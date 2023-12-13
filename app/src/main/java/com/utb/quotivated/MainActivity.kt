@@ -16,19 +16,27 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.rotate
@@ -76,9 +84,8 @@ fun RoundedBox(boxModifier: Modifier) {
     {
         Image(
             painter = painterResource(id = R.drawable.home),
-            contentDescription = "Home",
-            modifier = Modifier
-                .fillMaxSize(0.6f)
+            contentDescription = "Home Icon",
+            modifier = Modifier.size(20.dp)
         )
     }
 }
@@ -172,20 +179,68 @@ fun MainScreen(navController: NavHostController) {
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.earth),
-                        contentDescription = "Earth",
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(1f)
-                            .border(1.5.dp, Color.Black, shape = RoundedCornerShape(15.dp))
-                            .clip(RoundedCornerShape(15.dp))
-                    )
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Box(
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                Box(
+                                    modifier = Modifier.fillMaxSize()
+                                ) {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.tree),
+                                        contentDescription = "Earth",
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .border(1.5.dp, Color.Black, shape = RoundedCornerShape(15.dp))
+                                            .clip(RoundedCornerShape(15.dp))
+                                    )
+
+                                    Box(
+                                        modifier = Modifier
+                                            .size(45.dp)
+                                            .align(Alignment.TopEnd)
+                                            .border(1.5.dp, Color.Transparent, shape = RoundedCornerShape(20.dp))
+                                            .clip(RoundedCornerShape(20.dp))
+                                            .padding(2.5.dp)
+                                            .drawBehind {
+                                                val gradient = Brush.radialGradient(
+                                                    colors = listOf(Color.Cyan, Color.Transparent),
+                                                    center = center,
+                                                    radius = size.width / 2
+                                                )
+                                                drawRoundRect(
+                                                    brush = gradient,
+                                                    size = size.copy(height = size.height),
+                                                    )
+                                            },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Image(
+                                            painter = painterResource(id = R.drawable.favorite),
+                                            contentDescription = "Star Icon",
+                                            modifier = Modifier.size(22.dp),
+                                            colorFilter = ColorFilter.tint(Color.Black)
+                                        )
+                                    }
+                                }
+                            }
+
+                        }
+
+                    }
+
                 }
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(15.dp, 20.dp, 15.dp, 0.dp),
+                        .padding(15.dp, 30.dp, 15.dp, 0.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -204,7 +259,7 @@ fun MainScreen(navController: NavHostController) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(15.dp, 30.dp, 15.dp, 20.dp),
+                        .padding(15.dp, 35.dp, 15.dp, 25.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
