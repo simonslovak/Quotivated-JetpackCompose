@@ -1,4 +1,4 @@
-package com.utb.quotivated
+package com.utb.quotivated.activities
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,8 +21,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,23 +30,12 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.TileMode
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -59,6 +45,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.utb.quotivated.R
 import com.utb.quotivated.ui.theme.QuotivatedTheme
 
 class MainActivity : ComponentActivity() {
@@ -284,6 +271,7 @@ fun MainScreen(navController: NavHostController) {
                                             contentDescription = "Star Icon",
                                             modifier = Modifier
                                                 .size(22.dp)
+                                                .padding(0.dp, 2.5.dp, 0.dp, 0.dp)
                                                 .clickable { /* Handle click event if needed */ },
                                             colorFilter = ColorFilter.tint(Color.Black)
                                         )
@@ -303,7 +291,7 @@ fun MainScreen(navController: NavHostController) {
                                             .clickable { /* Handle click event if needed */ },
                                         contentAlignment = Alignment.TopCenter
                                     ) {
-                                        TextWithShadow("\"When one door of happiness closes, another opens; but often we look so long in disappointment and bitterness at the closed door that we do not expectantly look for and therefore see with pleasure and gratitude the one which has been opened for us.\"")
+                                        TextWithShadow("\"Your time is limited, so don't waste it living someone else's life. Don't be trapped by dogma – which is living with the results of other people's thinking.\"")
                                     }
                                     Box(
                                         modifier = Modifier
@@ -319,7 +307,7 @@ fun MainScreen(navController: NavHostController) {
                                             .clickable { /* Handle click event if needed */ },
                                         contentAlignment = Alignment.BottomEnd
                                     ) {
-                                        TextWithShadow("- Author")
+                                        TextWithShadow("- Steve Jobs")
                                     }
                                 }
                             }

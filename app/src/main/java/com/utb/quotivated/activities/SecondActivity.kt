@@ -1,4 +1,4 @@
-package com.utb.quotivated
+package com.utb.quotivated.activities
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
