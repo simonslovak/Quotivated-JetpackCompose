@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,18 +20,22 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
@@ -42,6 +47,10 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -85,7 +94,8 @@ fun RoundedBox(boxModifier: Modifier) {
         Image(
             painter = painterResource(id = R.drawable.home),
             contentDescription = "Home Icon",
-            modifier = Modifier.size(20.dp)
+            modifier = Modifier
+                .size(20.dp)
         )
     }
 }
@@ -121,6 +131,7 @@ fun CustomNavButton(
                     endX = 80f
                 )
             )
+            .clickable { }
     ) {
         Text(
             text = text,
@@ -146,6 +157,7 @@ fun CustomBaseButton(text: String, maxWidth: Float) {
             .border(1.5.dp, Color.Black, shape = RoundedCornerShape(20.dp, 20.dp, 20.dp, 20.dp))
             .clip(RoundedCornerShape(15.dp))
             .background(color = Color.Cyan)
+            .clickable { }
     ) {
         Text(
             text = text,
@@ -156,6 +168,41 @@ fun CustomBaseButton(text: String, maxWidth: Float) {
             fontSize = 12.sp
         )
     }
+}
+
+@Composable
+fun TextWithShadow(text: String) {
+    Text(
+        text = text,
+        color = Color.Cyan,
+        fontSize = 20.sp,
+        fontWeight = FontWeight.Bold,
+        fontFamily = FontFamily.Cursive,
+        modifier = Modifier
+            .wrapContentSize()
+            .offset((-0.5).dp, (-0.5).dp)
+            .blur(1.5.dp)
+    )
+    Text(
+        text = text,
+        color = Color.Cyan,
+        fontSize = 20.sp,
+        fontWeight = FontWeight.Bold,
+        fontFamily = FontFamily.Cursive,
+        modifier = Modifier
+            .wrapContentSize()
+            .offset(1.5.dp, 1.5.dp)
+            .blur(1.5.dp)
+    )
+    Text(
+        text = text,
+        color = Color.Black,
+        fontSize = 20.sp,
+        fontWeight = FontWeight.Bold,
+        fontFamily = FontFamily.Cursive,
+        modifier = Modifier
+            .wrapContentSize()
+    )
 }
 
 @Composable
@@ -185,28 +232,38 @@ fun MainScreen(navController: NavHostController) {
                             .aspectRatio(1f)
                     ) {
                         Column(
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier
+                                .fillMaxSize()
                         ) {
                             Box(
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier
+                                    .fillMaxSize()
                             ) {
                                 Box(
-                                    modifier = Modifier.fillMaxSize()
+                                    modifier = Modifier
+                                        .fillMaxSize()
                                 ) {
                                     Image(
                                         painter = painterResource(id = R.drawable.tree),
-                                        contentDescription = "Earth",
+                                        contentDescription = "Tree",
                                         modifier = Modifier
                                             .fillMaxSize()
-                                            .border(1.5.dp, Color.Black, shape = RoundedCornerShape(15.dp))
+                                            .border(
+                                                1.5.dp,
+                                                Color.Black,
+                                                shape = RoundedCornerShape(15.dp)
+                                            )
                                             .clip(RoundedCornerShape(15.dp))
                                     )
-
                                     Box(
                                         modifier = Modifier
                                             .size(45.dp)
                                             .align(Alignment.TopEnd)
-                                            .border(1.5.dp, Color.Transparent, shape = RoundedCornerShape(20.dp))
+                                            .border(
+                                                1.5.dp,
+                                                Color.Transparent,
+                                                shape = RoundedCornerShape(20.dp)
+                                            )
                                             .clip(RoundedCornerShape(20.dp))
                                             .padding(2.5.dp)
                                             .drawBehind {
@@ -218,16 +275,51 @@ fun MainScreen(navController: NavHostController) {
                                                 drawRoundRect(
                                                     brush = gradient,
                                                     size = size.copy(height = size.height),
-                                                    )
+                                                )
                                             },
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Image(
                                             painter = painterResource(id = R.drawable.favorite),
                                             contentDescription = "Star Icon",
-                                            modifier = Modifier.size(22.dp),
+                                            modifier = Modifier
+                                                .size(22.dp)
+                                                .clickable { /* Handle click event if needed */ },
                                             colorFilter = ColorFilter.tint(Color.Black)
                                         )
+                                    }
+
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(35.dp, 45.dp, 35.dp, 35.dp)
+                                            .background(
+                                                brush = Brush.radialGradient(
+                                                    colors = listOf(Color.Cyan, Color.Transparent),
+                                                    radius = 0.5f
+                                                )
+                                            )
+                                            .clip(RoundedCornerShape(15.dp))
+                                            .clickable { /* Handle click event if needed */ },
+                                        contentAlignment = Alignment.TopCenter
+                                    ) {
+                                        TextWithShadow("\"When one door of happiness closes, another opens; but often we look so long in disappointment and bitterness at the closed door that we do not expectantly look for and therefore see with pleasure and gratitude the one which has been opened for us.\"")
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(35.dp)
+                                            .background(
+                                                brush = Brush.radialGradient(
+                                                    colors = listOf(Color.Cyan, Color.Transparent),
+                                                    radius = 0.5f
+                                                )
+                                            )
+                                            .clip(RoundedCornerShape(15.dp))
+                                            .clickable { /* Handle click event if needed */ },
+                                        contentAlignment = Alignment.BottomEnd
+                                    ) {
+                                        TextWithShadow("- Author")
                                     }
                                 }
                             }
