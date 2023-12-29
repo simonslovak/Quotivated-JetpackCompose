@@ -1,9 +1,14 @@
 package com.utb.quotivated.data_classes
 
 data class Quote(
-    val id: String,
+    val _id: String,
+    val content: String,
     val author: String,
-    val width: Int,
-    val height: Int,
-    val download_url: String
+    val tags: List<String>,
+    val authorSlug: String,
+    val length: Int,
+    val dateAdded: String,
+    val dateModified: String
 )
+
+

@@ -1,9 +1,9 @@
-package com.utb.quotivated.interfaces
+package com.utb.quotivated.services
 
 import com.utb.quotivated.data_classes.Photo
 import retrofit2.http.GET
 
-interface LoremPicsumApi {
+interface LoremPicsumService {
     @GET("list")
     suspend fun getPhotos(): List<Photo>
 }

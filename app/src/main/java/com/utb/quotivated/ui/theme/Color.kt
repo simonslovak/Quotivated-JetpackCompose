@@ -1,5 +1,6 @@
 package com.utb.quotivated.ui.theme
 
+import android.graphics.ColorSpace.Rgb
 import androidx.compose.ui.graphics.Color
 
 val Purple80 = Color(0xFFD0BCFF)

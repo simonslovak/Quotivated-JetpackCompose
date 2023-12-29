@@ -1,7 +1,5 @@
 package com.utb.quotivated.activities
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -24,6 +22,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -46,10 +47,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.utb.quotivated.R
+import com.utb.quotivated.data_classes.Quote
 import com.utb.quotivated.ui.theme.QuotivatedTheme
+import com.utb.quotivated.repositories.QuotableRepository
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.compose.runtime.*
+import androidx.compose.ui.draw.alpha
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         setContent {
             QuotivatedTheme {
@@ -64,6 +72,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 @Composable
 fun RoundedBox(boxModifier: Modifier) {
     Box(
@@ -134,9 +143,12 @@ fun CustomNavButton(
     }
 }
 
-
 @Composable
-fun CustomBaseButton(text: String, maxWidth: Float) {
+fun CustomBaseButton(
+    text: String,
+    maxWidth: Float,
+    onClick: (() -> Unit)? = null // Default value is null
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth(maxWidth)
@@ -144,7 +156,7 @@ fun CustomBaseButton(text: String, maxWidth: Float) {
             .border(1.5.dp, Color.Black, shape = RoundedCornerShape(20.dp, 20.dp, 20.dp, 20.dp))
             .clip(RoundedCornerShape(15.dp))
             .background(color = Color.Cyan)
-            .clickable { }
+            .clickable { onClick?.invoke() } // Invoke the provided onClick callback if not null
     ) {
         Text(
             text = text,
@@ -158,11 +170,11 @@ fun CustomBaseButton(text: String, maxWidth: Float) {
 }
 
 @Composable
-fun TextWithShadow(text: String) {
+fun TextWithShadow(text: String, fontSize: Int) {
     Text(
         text = text,
-        color = Color.Cyan,
-        fontSize = 20.sp,
+        color = Color.Black,
+        fontSize = fontSize.sp,
         fontWeight = FontWeight.Bold,
         fontFamily = FontFamily.Cursive,
         modifier = Modifier
@@ -172,8 +184,8 @@ fun TextWithShadow(text: String) {
     )
     Text(
         text = text,
-        color = Color.Cyan,
-        fontSize = 20.sp,
+        color = Color.Black,
+        fontSize = fontSize.sp,
         fontWeight = FontWeight.Bold,
         fontFamily = FontFamily.Cursive,
         modifier = Modifier
@@ -183,8 +195,8 @@ fun TextWithShadow(text: String) {
     )
     Text(
         text = text,
-        color = Color.Black,
-        fontSize = 20.sp,
+        color = Color.Cyan,
+        fontSize = fontSize.sp,
         fontWeight = FontWeight.Bold,
         fontFamily = FontFamily.Cursive,
         modifier = Modifier
@@ -192,12 +204,17 @@ fun TextWithShadow(text: String) {
     )
 }
 
+
 @Composable
 fun MainScreen(navController: NavHostController) {
+
+    val quoteRepository = QuotableRepository()
+    var quote by remember { mutableStateOf<Quote?>(null) }
+
     Surface(
         modifier = Modifier
             .fillMaxSize(),
-        color = Color.Gray
+        color = Color.DarkGray
     ) {
         Box(
             modifier = Modifier
@@ -241,6 +258,7 @@ fun MainScreen(navController: NavHostController) {
                                                 shape = RoundedCornerShape(15.dp)
                                             )
                                             .clip(RoundedCornerShape(15.dp))
+                                            .alpha(0.7f)
                                     )
                                     Box(
                                         modifier = Modifier
@@ -287,11 +305,20 @@ fun MainScreen(navController: NavHostController) {
                                                     radius = 0.5f
                                                 )
                                             )
-                                            .clip(RoundedCornerShape(15.dp))
-                                            .clickable { /* Handle click event if needed */ },
+                                            .clip(RoundedCornerShape(15.dp)),
                                         contentAlignment = Alignment.TopCenter
                                     ) {
-                                        TextWithShadow("\"Your time is limited, so don't waste it living someone else's life. Don't be trapped by dogma – which is living with the results of other people's thinking.\"")
+                                        if (quote != null) {
+                                            TextWithShadow(
+                                                text = "${quote!!.content}",
+                                                fontSize = 22
+                                            )
+                                        } else {
+                                            TextWithShadow(
+                                                text = "Press the generate button to get a random quote.",
+                                                fontSize = 22
+                                            )
+                                        }
                                     }
                                     Box(
                                         modifier = Modifier
@@ -303,11 +330,13 @@ fun MainScreen(navController: NavHostController) {
                                                     radius = 0.5f
                                                 )
                                             )
-                                            .clip(RoundedCornerShape(15.dp))
-                                            .clickable { /* Handle click event if needed */ },
+                                            .clip(RoundedCornerShape(15.dp)),
                                         contentAlignment = Alignment.BottomEnd
                                     ) {
-                                        TextWithShadow("- Steve Jobs")
+                                        TextWithShadow(
+                                            "${quote?.author ?: "Unknown author"}",
+                                            fontSize = 18
+                                        )
                                     }
                                 }
                             }
@@ -334,7 +363,15 @@ fun MainScreen(navController: NavHostController) {
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    CustomBaseButton("Generate quote", 1f)
+                    CustomBaseButton(
+                        "Generate quote",
+                        1f,
+                        onClick = {
+                            quoteRepository.loadRandomQuote { result ->
+                                quote = result
+                            }
+                        }
+                    )
                 }
                 Row(
                     modifier = Modifier
