@@ -22,9 +22,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -47,24 +44,32 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.utb.quotivated.R
-import com.utb.quotivated.data_classes.Quote
 import com.utb.quotivated.ui.theme.QuotivatedTheme
-import com.utb.quotivated.repositories.QuotableRepository
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.viewModels
 import androidx.compose.runtime.*
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
+import com.utb.quotivated.view_model.AppViewModel
 
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
+    private val AppViewModel by viewModels<AppViewModel>()
 
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             QuotivatedTheme {
                 val navController = rememberNavController()
 
                 NavHost(navController = navController, startDestination = "main") {
-                    composable("main") { MainScreen(navController) }
+                    composable("main") {
+                        MainScreen(navController, AppViewModel)
+                    }
                     composable("second") { SecondScreen(navController) }
                     composable("third") { ThirdScreen(navController) }
                 }
@@ -147,7 +152,7 @@ fun CustomNavButton(
 fun CustomBaseButton(
     text: String,
     maxWidth: Float,
-    onClick: (() -> Unit)? = null // Default value is null
+    onClick: (() -> Unit)? = null
 ) {
     Box(
         modifier = Modifier
@@ -156,7 +161,7 @@ fun CustomBaseButton(
             .border(1.5.dp, Color.Black, shape = RoundedCornerShape(20.dp, 20.dp, 20.dp, 20.dp))
             .clip(RoundedCornerShape(15.dp))
             .background(color = Color.Cyan)
-            .clickable { onClick?.invoke() } // Invoke the provided onClick callback if not null
+            .clickable { onClick?.invoke() }
     ) {
         Text(
             text = text,
@@ -190,7 +195,7 @@ fun TextWithShadow(text: String, fontSize: Int) {
         fontFamily = FontFamily.Cursive,
         modifier = Modifier
             .wrapContentSize()
-            .offset(1.5.dp, 1.5.dp)
+            .offset(0.5.dp, 0.5.dp)
             .blur(1.5.dp)
     )
     Text(
@@ -204,16 +209,16 @@ fun TextWithShadow(text: String, fontSize: Int) {
     )
 }
 
-
 @Composable
-fun MainScreen(navController: NavHostController) {
+fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
 
-    val quoteRepository = QuotableRepository()
-    var quote by remember { mutableStateOf<Quote?>(null) }
+    LaunchedEffect(Unit) {
+        viewModel.loadRandomQuote()
+        viewModel.loadImageData()
+    }
 
     Surface(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         color = Color.DarkGray
     ) {
         Box(
@@ -223,7 +228,7 @@ fun MainScreen(navController: NavHostController) {
             contentAlignment = Alignment.BottomCenter
         ) {
             Column {
-                Row (
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(15.dp, 20.dp, 15.dp, 10.dp),
@@ -248,8 +253,14 @@ fun MainScreen(navController: NavHostController) {
                                         .fillMaxSize()
                                 ) {
                                     Image(
-                                        painter = painterResource(id = R.drawable.tree),
-                                        contentDescription = "Tree",
+                                        painter = rememberAsyncImagePainter(
+                                            ImageRequest.Builder(
+                                                LocalContext.current
+                                            ).data(data = viewModel.photo.value).apply(block = fun ImageRequest.Builder.() {
+
+                                            }).build()
+                                        ),
+                                        contentDescription = "Random image",
                                         modifier = Modifier
                                             .fillMaxSize()
                                             .border(
@@ -258,7 +269,7 @@ fun MainScreen(navController: NavHostController) {
                                                 shape = RoundedCornerShape(15.dp)
                                             )
                                             .clip(RoundedCornerShape(15.dp))
-                                            .alpha(0.7f)
+                                            .alpha(0.6f)
                                     )
                                     Box(
                                         modifier = Modifier
@@ -285,12 +296,12 @@ fun MainScreen(navController: NavHostController) {
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Image(
-                                            painter = painterResource(id = R.drawable.favorite),
+                                            painterResource(id = R.drawable.favorite),
                                             contentDescription = "Star Icon",
                                             modifier = Modifier
                                                 .size(22.dp)
                                                 .padding(0.dp, 2.5.dp, 0.dp, 0.dp)
-                                                .clickable { /* Handle click event if needed */ },
+                                                .clickable {},
                                             colorFilter = ColorFilter.tint(Color.Black)
                                         )
                                     }
@@ -308,17 +319,10 @@ fun MainScreen(navController: NavHostController) {
                                             .clip(RoundedCornerShape(15.dp)),
                                         contentAlignment = Alignment.TopCenter
                                     ) {
-                                        if (quote != null) {
-                                            TextWithShadow(
-                                                text = "${quote!!.content}",
-                                                fontSize = 22
-                                            )
-                                        } else {
-                                            TextWithShadow(
-                                                text = "Press the generate button to get a random quote.",
-                                                fontSize = 22
-                                            )
-                                        }
+                                        TextWithShadow(
+                                            text = "${viewModel.quote.value?.content.toString()?: "Press the generate button to get a random quote."}",
+                                            fontSize = 22
+                                        )
                                     }
                                     Box(
                                         modifier = Modifier
@@ -334,17 +338,14 @@ fun MainScreen(navController: NavHostController) {
                                         contentAlignment = Alignment.BottomEnd
                                     ) {
                                         TextWithShadow(
-                                            "${quote?.author ?: "Unknown author"}",
+                                            text = "${viewModel.quote.value?.author.toString()?: "Unknown author"}",
                                             fontSize = 18
                                         )
                                     }
                                 }
                             }
-
                         }
-
                     }
-
                 }
                 Row(
                     modifier = Modifier
@@ -353,8 +354,13 @@ fun MainScreen(navController: NavHostController) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    CustomBaseButton("Generate image", 0.45f)
-                    CustomBaseButton("Take photo", 0.90f)
+                    CustomBaseButton(
+                        "Generate image",
+                        1f,
+                        onClick = {
+                            viewModel.loadImageData()
+                        }
+                    )
                 }
                 Row(
                     modifier = Modifier
@@ -367,9 +373,7 @@ fun MainScreen(navController: NavHostController) {
                         "Generate quote",
                         1f,
                         onClick = {
-                            quoteRepository.loadRandomQuote { result ->
-                                quote = result
-                            }
+                            viewModel.loadRandomQuote()
                         }
                     )
                 }
@@ -390,7 +394,7 @@ fun MainScreen(navController: NavHostController) {
                     )
 
                     Spacer(modifier = Modifier
-                            .weight(0.05f))
+                        .weight(0.05f))
 
                     RoundedBox(
                         boxModifier = Modifier
@@ -420,6 +424,8 @@ fun MainPreview() {
     QuotivatedTheme {
         val navController = rememberNavController()
 
-        MainScreen(navController)
+        CompositionLocalProvider(LocalViewModelStoreOwner provides LocalContext.current as ViewModelStoreOwner) {
+            MainScreen(navController, AppViewModel())
+        }
     }
 }
