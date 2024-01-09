@@ -13,32 +13,21 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -48,6 +37,8 @@ import com.utb.quotivated.ui.theme.QuotivatedTheme
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
+import androidx.compose.foundation.clipScrollableContainer
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.*
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
@@ -55,6 +46,10 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.utb.quotivated.custom.CustomBaseButton
+import com.utb.quotivated.custom.CustomNavButton
+import com.utb.quotivated.custom.TextWithShadow
+import com.utb.quotivated.custom.RoundedBox
 import com.utb.quotivated.view_model.AppViewModel
 
 class MainActivity : ComponentActivity() {
@@ -79,137 +74,6 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun RoundedBox(boxModifier: Modifier) {
-    Box(
-        modifier = Modifier
-            .size(30.dp, 30.dp)
-            .then(boxModifier)
-            .border(1.5.dp, Color.Black, shape = RoundedCornerShape(5.dp))
-            .clip(RoundedCornerShape(5.dp))
-            .background(
-                color = Color.Cyan,
-            ),
-        contentAlignment = Alignment.Center
-    )
-    {
-        Image(
-            painter = painterResource(id = R.drawable.home),
-            contentDescription = "Home Icon",
-            modifier = Modifier
-                .size(20.dp)
-        )
-    }
-}
-@Composable
-fun CustomNavButton(
-    text: String,
-    shape: RoundedCornerShape,
-    rotation: Float,
-    textRotation: Float,
-    buttonModifier: Modifier
-) {
-    Box(
-        modifier = Modifier
-            .height(30.dp)
-            .fillMaxWidth()
-            .then(buttonModifier)
-            .border(
-                1.5.dp,
-                Color.Black,
-                shape = shape
-            )
-            .clip(shape)
-            .drawWithContent {
-                drawContent()
-            }
-            .graphicsLayer(
-                rotationY = rotation
-            )
-            .background(
-                brush = Brush.horizontalGradient(
-                    colors = listOf(Color.DarkGray, Color.Cyan),
-                    startX = 0f,
-                    endX = 80f
-                )
-            )
-            .clickable { }
-    ) {
-        Text(
-            text = text,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(7.dp)
-                .graphicsLayer(
-                    rotationY = textRotation
-                ),
-            textAlign = TextAlign.Center,
-            fontSize = 12.sp
-        )
-    }
-}
-
-@Composable
-fun CustomBaseButton(
-    text: String,
-    maxWidth: Float,
-    onClick: (() -> Unit)? = null
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth(maxWidth)
-            .height(30.dp)
-            .border(1.5.dp, Color.Black, shape = RoundedCornerShape(20.dp, 20.dp, 20.dp, 20.dp))
-            .clip(RoundedCornerShape(15.dp))
-            .background(color = Color.Cyan)
-            .clickable { onClick?.invoke() }
-    ) {
-        Text(
-            text = text,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(7.dp),
-            textAlign = TextAlign.Center,
-            fontSize = 12.sp
-        )
-    }
-}
-
-@Composable
-fun TextWithShadow(text: String, fontSize: Int) {
-    Text(
-        text = text,
-        color = Color.Black,
-        fontSize = fontSize.sp,
-        fontWeight = FontWeight.Bold,
-        fontFamily = FontFamily.Cursive,
-        modifier = Modifier
-            .wrapContentSize()
-            .offset((-0.5).dp, (-0.5).dp)
-            .blur(1.5.dp)
-    )
-    Text(
-        text = text,
-        color = Color.Black,
-        fontSize = fontSize.sp,
-        fontWeight = FontWeight.Bold,
-        fontFamily = FontFamily.Cursive,
-        modifier = Modifier
-            .wrapContentSize()
-            .offset(0.5.dp, 0.5.dp)
-            .blur(1.5.dp)
-    )
-    Text(
-        text = text,
-        color = Color.Cyan,
-        fontSize = fontSize.sp,
-        fontWeight = FontWeight.Bold,
-        fontFamily = FontFamily.Cursive,
-        modifier = Modifier
-            .wrapContentSize()
-    )
-}
-
-@Composable
 fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
 
     LaunchedEffect(Unit) {
@@ -224,7 +88,7 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(0.dp),
             contentAlignment = Alignment.BottomCenter
         ) {
             Column {
@@ -278,9 +142,9 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                                             .border(
                                                 1.5.dp,
                                                 Color.Transparent,
-                                                shape = RoundedCornerShape(20.dp)
+                                                shape = RoundedCornerShape(22.5.dp)
                                             )
-                                            .clip(RoundedCornerShape(20.dp))
+                                            .clip(RoundedCornerShape(22.5.dp))
                                             .padding(2.5.dp)
                                             .drawBehind {
                                                 val gradient = Brush.radialGradient(
@@ -292,16 +156,16 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                                                     brush = gradient,
                                                     size = size.copy(height = size.height),
                                                 )
-                                            },
+                                            }
+                                            .clickable {  },
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Image(
-                                            painterResource(id = R.drawable.favorite),
+                                            painterResource(id = R.drawable.favorite_empty),
                                             contentDescription = "Star Icon",
                                             modifier = Modifier
                                                 .size(22.dp)
-                                                .padding(0.dp, 2.5.dp, 0.dp, 0.dp)
-                                                .clickable {},
+                                                .padding(0.dp, 2.5.dp, 0.dp, 0.dp),
                                             colorFilter = ColorFilter.tint(Color.Black)
                                         )
                                     }
@@ -365,7 +229,7 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(15.dp, 20.dp, 15.dp, 0.dp),
+                        .padding(15.dp, 20.dp, 15.dp, 35.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -377,40 +241,53 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                         }
                     )
                 }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(1f)
+                        .height(5.dp)
+                        .background(color = Color.Transparent)
+                )
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(15.dp, 35.dp, 15.dp, 25.dp),
+                        .padding(0.5.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     CustomNavButton(
                         text = "Statistics",
-                        shape = RoundedCornerShape(15.dp, 5.dp, 5.dp, 15.dp),
+                        shape = RoundedCornerShape(5.dp),
                         rotation = 0f,
                         textRotation = 0f,
                         buttonModifier = Modifier
                             .weight(0.35f)
+                            .clickable {
+                                navController.navigate("third")
+                            }
                     )
 
                     Spacer(modifier = Modifier
-                        .weight(0.05f))
+                        .weight(0.005f))
 
                     RoundedBox(
                         boxModifier = Modifier
-                            .weight(0.2f)
+                            .weight(0.2f),
+                        imageId = R.drawable.home
                     )
 
                     Spacer(modifier = Modifier
-                        .weight(0.05f))
+                        .weight(0.005f))
 
                     CustomNavButton(
                         text = "Favorites",
-                        shape = RoundedCornerShape(5.dp, 15.dp, 15.dp, 5.dp),
+                        shape = RoundedCornerShape(5.dp),
                         rotation = 180f,
                         textRotation = 180f,
                         buttonModifier = Modifier
                             .weight(0.35f)
+                            .clickable {
+                                navController.navigate("second")
+                            }
                     )
                 }
             }
