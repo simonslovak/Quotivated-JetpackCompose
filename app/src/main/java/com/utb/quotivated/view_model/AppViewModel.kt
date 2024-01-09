@@ -18,12 +18,14 @@ class AppViewModel : ViewModel() {
     val photo: State<ByteArray?> = _photo
 
     init {
-        loadInitialData()
+        // Initialize with null or default values as needed
+        _quote.value = null
+        _photo.value = null
     }
 
-    fun loadInitialData() {
-        loadRandomQuote()
-        loadImageData()
+    fun setLoadedData(quote: Quote?, photo: ByteArray?) {
+        _quote.value = quote
+        _photo.value = photo
     }
 
     fun loadRandomQuote() {

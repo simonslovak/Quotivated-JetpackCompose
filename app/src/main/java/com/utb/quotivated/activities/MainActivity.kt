@@ -75,10 +75,28 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
+    // Use remember to keep track of whether data has been loaded
+    var isDataLoaded by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        viewModel.loadRandomQuote()
-        viewModel.loadImageData()
+    // Load data only if it hasn't been loaded yet
+    LaunchedEffect(isDataLoaded) {
+        if (!isDataLoaded) {
+            // Check if there's previously loaded data
+            val loadedQuote = viewModel.quote.value
+            val loadedPhoto = viewModel.photo.value
+
+            if (loadedQuote != null && loadedPhoto != null) {
+                // If there's loaded data, set it in the ViewModel
+                viewModel.setLoadedData(loadedQuote, loadedPhoto)
+            } else {
+                // Otherwise, load new data
+                viewModel.loadRandomQuote()
+                viewModel.loadImageData()
+            }
+
+            // Mark data as loaded
+            isDataLoaded = true
+        }
     }
 
     Surface(
