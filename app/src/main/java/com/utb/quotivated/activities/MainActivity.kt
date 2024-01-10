@@ -37,7 +37,6 @@ import com.utb.quotivated.ui.theme.QuotivatedTheme
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
-import androidx.compose.foundation.clipScrollableContainer
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.*
 import androidx.compose.ui.draw.alpha
@@ -75,26 +74,21 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
-    // Use remember to keep track of whether data has been loaded
+
+    var isFavorite by remember { mutableStateOf(false) }
     var isDataLoaded by remember { mutableStateOf(false) }
 
-    // Load data only if it hasn't been loaded yet
     LaunchedEffect(isDataLoaded) {
         if (!isDataLoaded) {
-            // Check if there's previously loaded data
             val loadedQuote = viewModel.quote.value
             val loadedPhoto = viewModel.photo.value
 
             if (loadedQuote != null && loadedPhoto != null) {
-                // If there's loaded data, set it in the ViewModel
                 viewModel.setLoadedData(loadedQuote, loadedPhoto)
             } else {
-                // Otherwise, load new data
                 viewModel.loadRandomQuote()
                 viewModel.loadImageData()
             }
-
-            // Mark data as loaded
             isDataLoaded = true
         }
     }
@@ -175,11 +169,13 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                                                     size = size.copy(height = size.height),
                                                 )
                                             }
-                                            .clickable {  },
+                                            .clickable {
+                                                viewModel.isFavorite = !viewModel.isFavorite
+                                            },
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Image(
-                                            painterResource(id = R.drawable.favorite_empty),
+                                            painterResource(id = if (viewModel.isFavorite) R.drawable.favorite_filled else R.drawable.favorite_empty),
                                             contentDescription = "Star Icon",
                                             modifier = Modifier
                                                 .size(22.dp)
