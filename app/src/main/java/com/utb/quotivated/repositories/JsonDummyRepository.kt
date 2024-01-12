@@ -1,28 +1,27 @@
 package com.utb.quotivated.repositories
 
 import android.util.Log
-import com.utb.quotivated.data_classes.Quote
-import com.utb.quotivated.services.QuotableService
+import com.utb.quotivated.data_classes.DummyQuote
+import com.utb.quotivated.services.JsonDummyService
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class QuotableRepository {
-
+class JsonDummyRepository {
     private val retrofit = Retrofit.Builder()
-        .baseUrl("https://api.quotable.io/")
+        .baseUrl("https://dummyjson.com/quotes/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    private val service = retrofit.create(QuotableService::class.java)
+    private val service = retrofit.create(JsonDummyService::class.java)
 
-    fun loadRandomQuote(onQuoteLoaded: (Quote) -> Unit) {
-        val call = service.getRandomQuote()
+    fun loadRandomDummyQuote(onQuoteLoaded: (DummyQuote) -> Unit) {
+        val call = service.getRandomDummyQuote()
 
-        call.enqueue(object : Callback<Quote> {
-            override fun onResponse(call: Call<Quote>, response: Response<Quote>) {
+        call.enqueue(object : Callback<DummyQuote> {
+            override fun onResponse(call: Call<DummyQuote>, response: Response<DummyQuote>) {
                 if (response.isSuccessful) {
                     val quote = response.body()
                     if (quote != null) {
@@ -31,7 +30,7 @@ class QuotableRepository {
                 }
             }
 
-            override fun onFailure(call: Call<Quote>, t: Throwable) {
+            override fun onFailure(call: Call<DummyQuote>, t: Throwable) {
                 Log.d("onFailureError", "Response failed")
             }
         }

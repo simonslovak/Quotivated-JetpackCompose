@@ -75,18 +75,18 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
 
-    var isFavorite by remember { mutableStateOf(false) }
     var isDataLoaded by remember { mutableStateOf(false) }
 
     LaunchedEffect(isDataLoaded) {
         if (!isDataLoaded) {
-            val loadedQuote = viewModel.quote.value
+            val loadedQuote = viewModel.dummy.value
             val loadedPhoto = viewModel.photo.value
 
             if (loadedQuote != null && loadedPhoto != null) {
                 viewModel.setLoadedData(loadedQuote, loadedPhoto)
             } else {
-                viewModel.loadRandomQuote()
+                viewModel.loadRandomDummyQuote()
+//                viewModel.loadRandomQuote()
                 viewModel.loadImageData()
             }
             isDataLoaded = true
@@ -198,8 +198,8 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                                         contentAlignment = Alignment.TopCenter
                                     ) {
                                         TextWithShadow(
-                                            text = "${viewModel.quote.value?.content.toString()?: "Press the generate button to get a random quote."}",
-                                            fontSize = 22
+                                            text = "${viewModel.dummy.value?.quote.toString()?: "Press the generate button to get a random quote."}",
+                                            fontSize = 26
                                         )
                                     }
                                     Box(
@@ -216,8 +216,8 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                                         contentAlignment = Alignment.BottomEnd
                                     ) {
                                         TextWithShadow(
-                                            text = "${viewModel.quote.value?.author.toString()?: "Unknown author"}",
-                                            fontSize = 18
+                                            text = "${viewModel.dummy.value?.author.toString()?: "Unknown author"}",
+                                            fontSize = 22
                                         )
                                     }
                                 }
@@ -251,7 +251,7 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                         "Generate quote",
                         1f,
                         onClick = {
-                            viewModel.loadRandomQuote()
+                            viewModel.loadRandomDummyQuote()
                         }
                     )
                 }
