@@ -74,25 +74,27 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
-
+    // Track whether data has been loaded to avoid reloading on recomposition
     var isDataLoaded by remember { mutableStateOf(false) }
 
+    // Load data when the composable is first launched
     LaunchedEffect(isDataLoaded) {
         if (!isDataLoaded) {
-            val loadedQuote = viewModel.dummy.value
+            val loadedQuote = viewModel.quote.value
             val loadedPhoto = viewModel.photo.value
 
+            // Check if data is already loaded, otherwise fetch from APIs
             if (loadedQuote != null && loadedPhoto != null) {
                 viewModel.setLoadedData(loadedQuote, loadedPhoto)
             } else {
-                viewModel.loadRandomDummyQuote()
-//                viewModel.loadRandomQuote()
+                viewModel.loadRandomQuote()
                 viewModel.loadImageData()
             }
             isDataLoaded = true
         }
     }
 
+    // Composable content
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color.DarkGray
@@ -104,6 +106,7 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
             contentAlignment = Alignment.BottomCenter
         ) {
             Column {
+                // UI elements for displaying quote and image
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -128,6 +131,7 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                                     modifier = Modifier
                                         .fillMaxSize()
                                 ) {
+                                    // Image loading with Coil
                                     Image(
                                         painter = rememberAsyncImagePainter(
                                             ImageRequest.Builder(
@@ -147,6 +151,8 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                                             .clip(RoundedCornerShape(15.dp))
                                             .alpha(0.6f)
                                     )
+
+                                    // Favorite button with gradient background
                                     Box(
                                         modifier = Modifier
                                             .size(45.dp)
@@ -170,10 +176,12 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                                                 )
                                             }
                                             .clickable {
+                                                // Toggle favorite state on click
                                                 viewModel.isFavorite = !viewModel.isFavorite
                                             },
                                         contentAlignment = Alignment.Center
                                     ) {
+                                        // Favorite icon
                                         Image(
                                             painterResource(id = if (viewModel.isFavorite) R.drawable.favorite_filled else R.drawable.favorite_empty),
                                             contentDescription = "Star Icon",
@@ -184,6 +192,7 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                                         )
                                     }
 
+                                    // Quote text
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
@@ -198,10 +207,12 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                                         contentAlignment = Alignment.TopCenter
                                     ) {
                                         TextWithShadow(
-                                            text = "${viewModel.dummy.value?.quote.toString()?: "Press the generate button to get a random quote."}",
+                                            text = "${viewModel.quote.value?.content.toString()?: "Press the generate button to get a random quote."}",
                                             fontSize = 26
                                         )
                                     }
+
+                                    // Author text
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
@@ -216,7 +227,7 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                                         contentAlignment = Alignment.BottomEnd
                                     ) {
                                         TextWithShadow(
-                                            text = "${viewModel.dummy.value?.author.toString()?: "Unknown author"}",
+                                            text = "${viewModel.quote.value?.author.toString()?: "Unknown author"}",
                                             fontSize = 22
                                         )
                                     }
@@ -225,6 +236,8 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                         }
                     }
                 }
+
+                // Button for generating a new image
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -240,6 +253,8 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                         }
                     )
                 }
+
+                // Button for generating a new quote
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -251,16 +266,20 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                         "Generate quote",
                         1f,
                         onClick = {
-                            viewModel.loadRandomDummyQuote()
+                            viewModel.loadRandomQuote()
                         }
                     )
                 }
+
+                // Separator line
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(1f)
                         .height(5.dp)
                         .background(color = Color.Transparent)
                 )
+
+                // Navigation buttons
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -268,6 +287,7 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Statistics button
                     CustomNavButton(
                         text = "Statistics",
                         shape = RoundedCornerShape(5.dp),
@@ -280,6 +300,7 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                             }
                     )
 
+                    // Home button with icon
                     Spacer(modifier = Modifier
                         .weight(0.005f))
 
@@ -289,6 +310,7 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                         imageId = R.drawable.home
                     )
 
+                    // Favorites button
                     Spacer(modifier = Modifier
                         .weight(0.005f))
 
