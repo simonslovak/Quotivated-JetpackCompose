@@ -115,7 +115,7 @@ fun SecondScreen(navController: NavHostController) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     CustomBaseButton(
-                        "Previous image",
+                        "Previous favorite",
                         1f,
                         onClick = {
 
@@ -130,7 +130,7 @@ fun SecondScreen(navController: NavHostController) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     CustomBaseButton(
-                        "Next image",
+                        "Next favorite",
                         1f,
                         onClick = {
 

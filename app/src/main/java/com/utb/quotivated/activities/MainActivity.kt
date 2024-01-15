@@ -35,6 +35,7 @@ import androidx.navigation.compose.rememberNavController
 import com.utb.quotivated.R
 import com.utb.quotivated.ui.theme.QuotivatedTheme
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.height
@@ -49,7 +50,10 @@ import com.utb.quotivated.custom.CustomBaseButton
 import com.utb.quotivated.custom.CustomNavButton
 import com.utb.quotivated.custom.TextWithShadow
 import com.utb.quotivated.custom.RoundedBox
+import com.utb.quotivated.data_store.QuoteData
+import com.utb.quotivated.data_store.StoreFavorite
 import com.utb.quotivated.view_model.AppViewModel
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private val AppViewModel by viewModels<AppViewModel>()
@@ -74,16 +78,18 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
-    // Track whether data has been loaded to avoid reloading on recomposition
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val dataStore = StoreFavorite(context)
+    val savedQuotes = dataStore.getQuotes.collectAsState(initial = emptyList())
+
     var isDataLoaded by remember { mutableStateOf(false) }
 
-    // Load data when the composable is first launched
     LaunchedEffect(isDataLoaded) {
         if (!isDataLoaded) {
             val loadedQuote = viewModel.quote.value
             val loadedPhoto = viewModel.photo.value
 
-            // Check if data is already loaded, otherwise fetch from APIs
             if (loadedQuote != null && loadedPhoto != null) {
                 viewModel.setLoadedData(loadedQuote, loadedPhoto)
             } else {
@@ -94,7 +100,6 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
         }
     }
 
-    // Composable content
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color.DarkGray
@@ -106,7 +111,6 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
             contentAlignment = Alignment.BottomCenter
         ) {
             Column {
-                // UI elements for displaying quote and image
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -131,7 +135,6 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                                     modifier = Modifier
                                         .fillMaxSize()
                                 ) {
-                                    // Image loading with Coil
                                     Image(
                                         painter = rememberAsyncImagePainter(
                                             ImageRequest.Builder(
@@ -151,8 +154,6 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                                             .clip(RoundedCornerShape(15.dp))
                                             .alpha(0.6f)
                                     )
-
-                                    // Favorite button with gradient background
                                     Box(
                                         modifier = Modifier
                                             .size(45.dp)
@@ -176,12 +177,33 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                                                 )
                                             }
                                             .clickable {
-                                                // Toggle favorite state on click
                                                 viewModel.isFavorite = !viewModel.isFavorite
+                                                scope.launch {
+                                                    val quote = viewModel.quote.value
+                                                    val photo = viewModel.photo.value
+                                                    if (quote != null && photo != null) {
+                                                        // Add or remove the quote from the list based on the favorite status
+                                                        val newQuote = QuoteData(
+                                                            text = quote.content ?: "",
+                                                            author = quote.author ?: "Unknown author",
+                                                            image = photo
+                                                        )
+                                                        val updatedQuotes = if (viewModel.isFavorite) {
+                                                            val newList = savedQuotes.value + newQuote
+                                                            Log.d("Quotivated", "Adding quote to the list. New list size: ${newList.size}")
+                                                            newList
+                                                        } else {
+                                                            val newList = savedQuotes.value.dropLast(1)
+                                                            Log.d("Quotivated", "Removing the last quote from the list. New list size: ${newList.size}")
+                                                            newList
+                                                        }
+                                                        dataStore.saveQuotes(updatedQuotes)
+                                                    }
+                                                }
                                             },
+
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        // Favorite icon
                                         Image(
                                             painterResource(id = if (viewModel.isFavorite) R.drawable.favorite_filled else R.drawable.favorite_empty),
                                             contentDescription = "Star Icon",
@@ -191,8 +213,6 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                                             colorFilter = ColorFilter.tint(Color.Black)
                                         )
                                     }
-
-                                    // Quote text
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
@@ -211,8 +231,6 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                                             fontSize = 26
                                         )
                                     }
-
-                                    // Author text
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
@@ -236,8 +254,6 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                         }
                     }
                 }
-
-                // Button for generating a new image
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -253,8 +269,6 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                         }
                     )
                 }
-
-                // Button for generating a new quote
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -270,16 +284,12 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                         }
                     )
                 }
-
-                // Separator line
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(1f)
                         .height(5.dp)
                         .background(color = Color.Transparent)
                 )
-
-                // Navigation buttons
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -287,7 +297,6 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Statistics button
                     CustomNavButton(
                         text = "Statistics",
                         shape = RoundedCornerShape(5.dp),
@@ -299,8 +308,6 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                                 navController.navigate("third")
                             }
                     )
-
-                    // Home button with icon
                     Spacer(modifier = Modifier
                         .weight(0.005f))
 
@@ -309,8 +316,6 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                             .weight(0.2f),
                         imageId = R.drawable.home
                     )
-
-                    // Favorites button
                     Spacer(modifier = Modifier
                         .weight(0.005f))
 

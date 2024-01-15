@@ -34,6 +34,7 @@ import com.utb.quotivated.custom.CustomBaseButton
 import com.utb.quotivated.custom.CustomNavButton
 import com.utb.quotivated.custom.RoundedBox
 import com.utb.quotivated.custom.TextWithShadow
+import com.utb.quotivated.data_store.StoreFavorite
 import com.utb.quotivated.ui.theme.QuotivatedTheme
 
 class ThirdActivity : ComponentActivity() {
@@ -55,6 +56,10 @@ class ThirdActivity : ComponentActivity() {
 
 @Composable
 fun ThirdScreen(navController: NavHostController) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val dataStore = StoreFavorite(context)
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color.DarkGray
@@ -115,7 +120,7 @@ fun ThirdScreen(navController: NavHostController) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     CustomBaseButton(
-                        "Reset stats",
+                        "Reset statistics",
                         1f,
                         onClick = {
 
@@ -129,9 +134,13 @@ fun ThirdScreen(navController: NavHostController) {
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Spacer(modifier = Modifier
-                        .height(30.dp)
-                        .fillMaxWidth())
+                    CustomBaseButton(
+                        "Reset favorites",
+                        1f,
+                        onClick = {
+
+                        }
+                    )
                 }
                 Box(
                     modifier = Modifier
