@@ -1,6 +1,13 @@
+// MainActivity.kt
 package com.utb.quotivated.activities
 
+import android.app.Application
+import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
+import androidx.activity.ComponentActivity
+import androidx.activity.viewModels
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,33 +24,27 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.utb.quotivated.R
 import com.utb.quotivated.ui.theme.QuotivatedTheme
-import android.os.Bundle
-import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.activity.viewModels
-import androidx.compose.foundation.layout.height
-import androidx.compose.runtime.*
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.ViewModelStoreOwner
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.utb.quotivated.custom.CustomBaseButton
@@ -81,7 +82,7 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val dataStore = StoreFavorite(context)
-    val savedQuotes = dataStore.getQuotes.collectAsState(initial = emptyList())
+    val savedQuotes by viewModel.savedQuotes.collectAsState(initial = emptyList())
 
     var isDataLoaded by remember { mutableStateOf(false) }
 
@@ -189,15 +190,15 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                                                             image = photo
                                                         )
                                                         val updatedQuotes = if (viewModel.isFavorite) {
-                                                            val newList = savedQuotes.value + newQuote
+                                                            val newList = savedQuotes + newQuote
                                                             Log.d("Quotivated", "Adding quote to the list. New list size: ${newList.size}")
                                                             newList
                                                         } else {
-                                                            val newList = savedQuotes.value.dropLast(1)
+                                                            val newList = savedQuotes.dropLast(1)
                                                             Log.d("Quotivated", "Removing the last quote from the list. New list size: ${newList.size}")
                                                             newList
                                                         }
-                                                        dataStore.saveQuotes(updatedQuotes)
+                                                        viewModel.saveQuotes(updatedQuotes)
                                                     }
                                                 }
                                             },
@@ -343,7 +344,7 @@ fun MainPreview() {
         val navController = rememberNavController()
 
         CompositionLocalProvider(LocalViewModelStoreOwner provides LocalContext.current as ViewModelStoreOwner) {
-            MainScreen(navController, AppViewModel())
+            MainScreen(navController, AppViewModel(Application()))
         }
     }
 }

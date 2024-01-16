@@ -3,6 +3,7 @@ package com.utb.quotivated.activities
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -35,6 +36,7 @@ import com.utb.quotivated.custom.CustomNavButton
 import com.utb.quotivated.custom.RoundedBox
 import com.utb.quotivated.custom.TextWithShadow
 import com.utb.quotivated.ui.theme.QuotivatedTheme
+import com.utb.quotivated.view_model.AppViewModel
 
 class SecondActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
