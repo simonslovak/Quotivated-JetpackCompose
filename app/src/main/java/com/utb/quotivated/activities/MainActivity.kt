@@ -51,8 +51,7 @@ import com.utb.quotivated.custom.CustomBaseButton
 import com.utb.quotivated.custom.CustomNavButton
 import com.utb.quotivated.custom.TextWithShadow
 import com.utb.quotivated.custom.RoundedBox
-import com.utb.quotivated.data_store.QuoteData
-import com.utb.quotivated.data_store.StoreFavorite
+import com.utb.quotivated.data_classes.QuoteData
 import com.utb.quotivated.view_model.AppViewModel
 import kotlinx.coroutines.launch
 
@@ -69,8 +68,8 @@ class MainActivity : ComponentActivity() {
                     composable("main") {
                         MainScreen(navController, AppViewModel)
                     }
-                    composable("second") { SecondScreen(navController) }
-                    composable("third") { ThirdScreen(navController) }
+                    composable("second") { SecondScreen(navController, AppViewModel) }
+                    composable("third") { ThirdScreen(navController, AppViewModel) }
                 }
             }
         }
@@ -79,9 +78,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val dataStore = StoreFavorite(context)
     val savedQuotes by viewModel.savedQuotes.collectAsState(initial = emptyList())
 
     var isDataLoaded by remember { mutableStateOf(false) }
@@ -183,10 +180,9 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                                                     val quote = viewModel.quote.value
                                                     val photo = viewModel.photo.value
                                                     if (quote != null && photo != null) {
-                                                        // Add or remove the quote from the list based on the favorite status
                                                         val newQuote = QuoteData(
                                                             text = quote.content ?: "",
-                                                            author = quote.author ?: "Unknown author",
+                                                            author = quote.author ?: "",
                                                             image = photo
                                                         )
                                                         val updatedQuotes = if (viewModel.isFavorite) {
@@ -202,7 +198,6 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                                                     }
                                                 }
                                             },
-
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Image(
@@ -267,6 +262,7 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                         1f,
                         onClick = {
                             viewModel.loadImageData()
+                            viewModel.isFavorite = false
                         }
                     )
                 }
@@ -282,6 +278,7 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                         1f,
                         onClick = {
                             viewModel.loadRandomQuote()
+                            viewModel.isFavorite = false
                         }
                     )
                 }
@@ -310,16 +307,16 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                             }
                     )
                     Spacer(modifier = Modifier
-                        .weight(0.005f))
-
+                        .weight(0.005f)
+                    )
                     RoundedBox(
                         boxModifier = Modifier
                             .weight(0.2f),
                         imageId = R.drawable.home
                     )
                     Spacer(modifier = Modifier
-                        .weight(0.005f))
-
+                        .weight(0.005f)
+                    )
                     CustomNavButton(
                         text = "Favorites",
                         shape = RoundedCornerShape(5.dp),

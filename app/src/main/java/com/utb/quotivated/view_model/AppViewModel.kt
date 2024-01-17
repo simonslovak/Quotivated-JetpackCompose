@@ -1,23 +1,18 @@
+// AppViewModel.kt
 package com.utb.quotivated.view_model
 
 import android.app.Application
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.utb.quotivated.data_classes.DummyQuote
 import com.utb.quotivated.data_classes.Quote
-import com.utb.quotivated.data_store.QuoteData
+import com.utb.quotivated.data_classes.QuoteData
 import com.utb.quotivated.data_store.StoreFavorite
-import com.utb.quotivated.repositories.JsonDummyRepository
 import com.utb.quotivated.repositories.LoremPicsumRepository
 import com.utb.quotivated.repositories.QuotableRepository
 import kotlinx.coroutines.flow.Flow
-
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -30,6 +25,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val _photo = mutableStateOf<ByteArray?>(null)
     val photo: State<ByteArray?> = _photo
 
+    private val _quoteData = mutableStateOf<QuoteData?>(null)
+    val quoteData: State<QuoteData?> = _quoteData
+
     private val dataStore: StoreFavorite = StoreFavorite(application)
 
     val savedQuotes: Flow<List<QuoteData>> = dataStore.getQuotes
@@ -39,6 +37,15 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun setLoadedData(quote: Quote?, photo: ByteArray?) {
         _quote.value = quote
         _photo.value = photo
+    }
+
+    // New setters and getters for QuoteData
+    fun setLoadedData(quoteData: QuoteData?) {
+        _quoteData.value = quoteData
+    }
+
+    fun getQuoteData(): QuoteData? {
+        return _quoteData.value
     }
 
     fun loadRandomQuote() {
@@ -61,4 +68,3 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         dataStore.clearQuotes()
     }
 }
-

@@ -1,3 +1,4 @@
+// StoreFavorite
 package com.utb.quotivated.data_store
 
 import android.content.Context
@@ -8,10 +9,9 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.utb.quotivated.data_classes.QuoteData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-
-data class QuoteData(val text: String, val author: String, val image: ByteArray)
 
 class StoreFavorite(private val context: Context) {
 

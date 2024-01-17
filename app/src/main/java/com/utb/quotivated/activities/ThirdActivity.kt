@@ -1,43 +1,43 @@
+// ThirdActivity.kt
 package com.utb.quotivated.activities
 
+import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
 import com.utb.quotivated.R
 import com.utb.quotivated.custom.CustomBaseButton
 import com.utb.quotivated.custom.CustomNavButton
 import com.utb.quotivated.custom.RoundedBox
 import com.utb.quotivated.custom.TextWithShadow
-import com.utb.quotivated.data_store.StoreFavorite
 import com.utb.quotivated.ui.theme.QuotivatedTheme
+import com.utb.quotivated.view_model.AppViewModel
+import kotlinx.coroutines.flow.count
+import kotlinx.coroutines.flow.toList
 
 class ThirdActivity : ComponentActivity() {
+    private val AppViewModel by viewModels<AppViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -47,7 +47,7 @@ class ThirdActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    ThirdScreen(navController = rememberNavController())
+                    ThirdScreen(navController = rememberNavController(), AppViewModel)
                 }
             }
         }
@@ -55,10 +55,10 @@ class ThirdActivity : ComponentActivity() {
 }
 
 @Composable
-fun ThirdScreen(navController: NavHostController) {
-    val context = LocalContext.current
+fun ThirdScreen(navController: NavHostController, viewModel: AppViewModel) {
+
     val scope = rememberCoroutineScope()
-    val dataStore = StoreFavorite(context)
+    val savedQuotesSize by viewModel.savedQuotes.collectAsState(initial = emptyList())
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -106,7 +106,37 @@ fun ThirdScreen(navController: NavHostController) {
                                             .clip(RoundedCornerShape(15.dp))
                                             .alpha(0.6f)
                                             .background(color=Color.Gray)
-                                    )
+                                    ) {
+                                        Image(
+                                            painter = painterResource(id = R.drawable.statistics_background),
+                                            contentDescription = "Random image",
+                                            modifier = Modifier.fillMaxSize()
+                                                .border(1.5.dp, Color.Black, shape = RoundedCornerShape(15.dp))
+                                                .clip(RoundedCornerShape(15.dp))
+                                                .alpha(0.6f)
+                                        )
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .padding(35.dp, 45.dp, 35.dp, 35.dp)
+                                                .background(
+                                                    brush = Brush.radialGradient(
+                                                        colors = listOf(Color.Cyan, Color.Transparent),
+                                                        radius = 0.5f
+                                                    )
+                                                )
+                                                .clip(RoundedCornerShape(15.dp)),
+                                            contentAlignment = Alignment.TopStart
+                                        ) {
+                                            TextWithShadow(
+                                                text = "" +
+                                                        "Favorites stored: ${savedQuotesSize.size}\n\n\n" +
+                                                        "Quotes generated: \n\n\n" +
+                                                        "Images generated: ",
+                                                fontSize = 30
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -189,6 +219,6 @@ fun ThirdScreen(navController: NavHostController) {
 @Composable
 fun ThirdScreenPreview() {
     QuotivatedTheme {
-        ThirdScreen(navController = rememberNavController())
+        ThirdScreen(navController = rememberNavController(), AppViewModel(Application()))
     }
 }

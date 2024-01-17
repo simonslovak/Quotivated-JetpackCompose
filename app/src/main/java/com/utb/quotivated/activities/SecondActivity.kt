@@ -1,6 +1,8 @@
+// SecondActivity.kt
 package com.utb.quotivated.activities
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -10,9 +12,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -23,8 +25,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -35,20 +35,23 @@ import com.utb.quotivated.custom.CustomBaseButton
 import com.utb.quotivated.custom.CustomNavButton
 import com.utb.quotivated.custom.RoundedBox
 import com.utb.quotivated.custom.TextWithShadow
+import com.utb.quotivated.data_classes.QuoteData
 import com.utb.quotivated.ui.theme.QuotivatedTheme
 import com.utb.quotivated.view_model.AppViewModel
+import kotlinx.coroutines.launch
 
 class SecondActivity : ComponentActivity() {
+    private val appViewModel by viewModels<AppViewModel>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             QuotivatedTheme {
-                // You can customize the color and appearance of the Surface as needed
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    SecondScreen(navController = rememberNavController())
+                    SecondScreen(navController = rememberNavController(), appViewModel)
                 }
             }
         }
@@ -56,63 +59,151 @@ class SecondActivity : ComponentActivity() {
 }
 
 @Composable
-fun SecondScreen(navController: NavHostController) {
+fun SecondScreen(navController: NavHostController, viewModel: AppViewModel) {
+    val scope = rememberCoroutineScope()
+    var currentIndex by rememberSaveable { mutableStateOf(0) }
+    val savedQuotes by viewModel.savedQuotes.collectAsState(initial = emptyList())
+
+    LaunchedEffect(rememberUpdatedState(currentIndex)) {
+        if (savedQuotes.isNotEmpty()) {
+            currentIndex = savedQuotes.size - 1
+            viewModel.setLoadedData(
+                QuoteData(
+                    text = savedQuotes[currentIndex].text,
+                    author = savedQuotes[currentIndex].author,
+                    image = savedQuotes[currentIndex].image
+                )
+            )
+        }
+    }
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color.DarkGray
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(0.dp),
+            modifier = Modifier.fillMaxSize().padding(0.dp),
             contentAlignment = Alignment.BottomCenter
         ) {
             Column {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(15.dp, 20.dp, 15.dp, 10.dp),
+                    modifier = Modifier.fillMaxWidth().padding(15.dp, 20.dp, 15.dp, 10.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(1f)
+                        modifier = Modifier.fillMaxWidth().aspectRatio(1f)
                     ) {
                         Column(
-                            modifier = Modifier
-                                .fillMaxSize()
+                            modifier = Modifier.fillMaxSize()
                         ) {
                             Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
+                                modifier = Modifier.fillMaxSize()
                             ) {
                                 Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
+                                    modifier = Modifier.fillMaxSize()
                                 ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .border(
-                                                1.5.dp,
-                                                Color.Black,
-                                                shape = RoundedCornerShape(15.dp)
-                                            )
+                                    Image(
+                                        painter = rememberAsyncImagePainter(
+                                            ImageRequest.Builder(LocalContext.current)
+                                                .data(data = viewModel.quoteData.value?.image ?: byteArrayOf())
+                                                .apply {
+                                                }.build()
+                                        ),
+                                        contentDescription = "Random image",
+                                        modifier = Modifier.fillMaxSize()
+                                            .border(1.5.dp, Color.Black, shape = RoundedCornerShape(15.dp))
                                             .clip(RoundedCornerShape(15.dp))
                                             .alpha(0.6f)
-                                            .background(color=Color.Gray)
                                     )
+                                    Box(
+                                        modifier = Modifier.size(45.dp)
+                                            .align(Alignment.TopEnd)
+                                            .border(1.5.dp, Color.Transparent, shape = RoundedCornerShape(22.5.dp))
+                                            .clip(RoundedCornerShape(22.5.dp))
+                                            .padding(2.5.dp)
+                                            .drawBehind {
+                                                val gradient = Brush.radialGradient(
+                                                    colors = listOf(Color.Cyan, Color.Transparent),
+                                                    center = center,
+                                                    radius = size.width / 2
+                                                )
+                                                drawRoundRect(
+                                                    brush = gradient,
+                                                    size = size.copy(height = size.height),
+                                                )
+                                            }
+                                            .clickable {
+                                                scope.launch {
+                                                    if (savedQuotes.isNotEmpty()) {
+                                                        val updatedQuotes = savedQuotes.toMutableList().apply {
+                                                            removeAt(currentIndex)
+                                                        }
+                                                        currentIndex = if (updatedQuotes.isNotEmpty()) {
+                                                            (currentIndex + 1) % updatedQuotes.size
+                                                        } else {
+                                                            0
+                                                        }
+                                                        if (updatedQuotes.isNotEmpty()) {
+                                                            viewModel.setLoadedData(updatedQuotes[currentIndex])
+                                                        } else {
+                                                            viewModel.setLoadedData(
+                                                                QuoteData(
+                                                                    text = "Press the generate button to get a random quote.",
+                                                                    author = "Unknown author",
+                                                                    image = byteArrayOf()
+                                                                )
+                                                            )
+                                                        }
+                                                        viewModel.saveQuotes(updatedQuotes)
+                                                    }
+                                                }
+                                            },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Image(
+                                            painterResource(id = R.drawable.favorite_filled),
+                                            contentDescription = "Star Icon",
+                                            modifier = Modifier.size(22.dp).padding(0.dp, 2.5.dp, 0.dp, 0.dp),
+                                            colorFilter = ColorFilter.tint(Color.Black)
+                                        )
+                                    }
+                                    Box(
+                                        modifier = Modifier.fillMaxSize().padding(35.dp, 45.dp, 35.dp, 35.dp)
+                                            .background(brush = Brush.radialGradient(
+                                                colors = listOf(Color.Cyan, Color.Transparent),
+                                                radius = 0.5f
+                                            ))
+                                            .clip(RoundedCornerShape(15.dp)),
+                                        contentAlignment = Alignment.TopCenter
+                                    ) {
+                                        TextWithShadow(
+                                            text = "${viewModel.quoteData.value?.text ?: "No favorite quote and image"}",
+                                            fontSize = 26
+                                        )
+                                    }
+                                    Box(
+                                        modifier = Modifier.fillMaxSize().padding(35.dp)
+                                            .background(brush = Brush.radialGradient(
+                                                colors = listOf(Color.Cyan, Color.Transparent),
+                                                radius = 0.5f
+                                                )
+                                            )
+                                            .clip(RoundedCornerShape(15.dp)),
+                                        contentAlignment = Alignment.BottomEnd
+                                    ) {
+                                        TextWithShadow(
+                                            text = "${viewModel.quoteData.value?.author ?: "No favorite author"}",
+                                            fontSize = 22
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
                 }
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(15.dp, 30.dp, 15.dp, 0.dp),
+                    modifier = Modifier.fillMaxWidth().padding(15.dp, 30.dp, 15.dp, 0.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -120,14 +211,15 @@ fun SecondScreen(navController: NavHostController) {
                         "Previous favorite",
                         1f,
                         onClick = {
-
+                            currentIndex = (currentIndex - 1 + savedQuotes.size) % savedQuotes.size
+                            if (currentIndex >= 0 && currentIndex < savedQuotes.size) {
+                                viewModel.setLoadedData(savedQuotes[currentIndex])
+                            }
                         }
                     )
                 }
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(15.dp, 20.dp, 15.dp, 35.dp),
+                    modifier = Modifier.fillMaxWidth().padding(15.dp, 20.dp, 15.dp, 35.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -135,20 +227,16 @@ fun SecondScreen(navController: NavHostController) {
                         "Next favorite",
                         1f,
                         onClick = {
-
+                            currentIndex = (currentIndex + 1) % savedQuotes.size
+                            viewModel.setLoadedData(savedQuotes[currentIndex])
                         }
                     )
                 }
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth(1f)
-                        .height(5.dp)
-                        .background(color = Color.Transparent)
+                    modifier = Modifier.fillMaxWidth(1f).height(5.dp).background(color = Color.Transparent)
                 )
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(0.5.dp),
+                    modifier = Modifier.fillMaxWidth().padding(0.5.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -163,30 +251,18 @@ fun SecondScreen(navController: NavHostController) {
                                 navController.navigate("main")
                             }
                     )
-
-                    Spacer(modifier = Modifier
-                        .weight(0.005f)
+                    Spacer(
+                        modifier = Modifier.weight(0.005f)
                     )
-
                     RoundedBox(
-                        boxModifier = Modifier
-                            .weight(0.2f),
+                        boxModifier = Modifier.weight(0.2f),
                         imageId = R.drawable.favorite_empty
                     )
-
-                    Spacer(modifier = Modifier
-                        .weight(0.355f)
+                    Spacer(
+                        modifier = Modifier.weight(0.355f)
                     )
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SecondScreenPreview() {
-    QuotivatedTheme {
-        SecondScreen(navController = rememberNavController())
     }
 }
