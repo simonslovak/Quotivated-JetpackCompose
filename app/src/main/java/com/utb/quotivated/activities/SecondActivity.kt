@@ -2,7 +2,6 @@
 package com.utb.quotivated.activities
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -211,9 +210,11 @@ fun SecondScreen(navController: NavHostController, viewModel: AppViewModel) {
                         "Previous favorite",
                         1f,
                         onClick = {
-                            currentIndex = (currentIndex - 1 + savedQuotes.size) % savedQuotes.size
-                            if (currentIndex >= 0 && currentIndex < savedQuotes.size) {
-                                viewModel.setLoadedData(savedQuotes[currentIndex])
+                            if (savedQuotes.isNotEmpty()) {
+                                currentIndex = (currentIndex - 1 + savedQuotes.size) % savedQuotes.size
+                                if (currentIndex >= 0 && currentIndex < savedQuotes.size) {
+                                    viewModel.setLoadedData(savedQuotes[currentIndex])
+                                }
                             }
                         }
                     )
@@ -227,8 +228,10 @@ fun SecondScreen(navController: NavHostController, viewModel: AppViewModel) {
                         "Next favorite",
                         1f,
                         onClick = {
-                            currentIndex = (currentIndex + 1) % savedQuotes.size
-                            viewModel.setLoadedData(savedQuotes[currentIndex])
+                            if (savedQuotes.isNotEmpty()) {
+                                currentIndex = (currentIndex + 1) % savedQuotes.size
+                                viewModel.setLoadedData(savedQuotes[currentIndex])
+                            }
                         }
                     )
                 }

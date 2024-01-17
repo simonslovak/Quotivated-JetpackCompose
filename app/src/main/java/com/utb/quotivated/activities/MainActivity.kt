@@ -37,7 +37,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -60,6 +62,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen()
         setContent {
             QuotivatedTheme {
                 val navController = rememberNavController()
@@ -80,8 +83,13 @@ class MainActivity : ComponentActivity() {
 fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
     val scope = rememberCoroutineScope()
     val savedQuotes by viewModel.savedQuotes.collectAsState(initial = emptyList())
-
     var isDataLoaded by remember { mutableStateOf(false) }
+    
+    var image_count by remember { mutableStateOf(0) }
+    var quote_count by remember { mutableStateOf(0) }
+    
+    image_count = viewModel.getImageCount.collectAsState(initial = 0).value
+    quote_count = viewModel.getQuoteCount.collectAsState(initial = 0).value
 
     LaunchedEffect(isDataLoaded) {
         if (!isDataLoaded) {
@@ -263,6 +271,10 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                         onClick = {
                             viewModel.loadImageData()
                             viewModel.isFavorite = false
+                            image_count++
+                            viewModel.viewModelScope.launch {
+                                viewModel.saveGenerateImageCount(image_count)
+                            }
                         }
                     )
                 }
@@ -279,6 +291,10 @@ fun MainScreen(navController: NavHostController, viewModel: AppViewModel) {
                         onClick = {
                             viewModel.loadRandomQuote()
                             viewModel.isFavorite = false
+                            quote_count++
+                            viewModel.viewModelScope.launch {
+                                viewModel.saveGenerateQuoteCount(quote_count)
+                            }
                         }
                     )
                 }

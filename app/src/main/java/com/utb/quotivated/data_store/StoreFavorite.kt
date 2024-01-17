@@ -1,11 +1,9 @@
-// StoreFavorite
+// StoreFavorite.kt
 package com.utb.quotivated.data_store
 
 import android.content.Context
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -18,6 +16,8 @@ class StoreFavorite(private val context: Context) {
     companion object {
         private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("UserQuotes")
         val USER_QUOTES_KEY = stringPreferencesKey("user_quotes")
+        val GENERATE_QUOTE_COUNT_KEY = intPreferencesKey("generate_quote_count")
+        val GENERATE_IMAGE_COUNT_KEY = intPreferencesKey("generate_image_count")
     }
 
     private val preferencesFlow: Flow<Preferences> = context.dataStore.data
@@ -31,14 +31,41 @@ class StoreFavorite(private val context: Context) {
             gson.fromJson(jsonString, typeToken) ?: emptyList()
         }
 
+    val getGenerateQuoteCount: Flow<Int> = preferencesFlow
+        .map { preferences ->
+            preferences[GENERATE_QUOTE_COUNT_KEY] ?: 0
+        }
+
+    val getGenerateImageCount: Flow<Int> = preferencesFlow
+        .map { preferences ->
+            preferences[GENERATE_IMAGE_COUNT_KEY] ?: 0
+        }
+
     suspend fun saveQuotes(quotes: List<QuoteData>) {
-        val jsonString = gson.toJson(quotes)
         context.dataStore.edit { preferences ->
-            preferences[USER_QUOTES_KEY] = jsonString
+            preferences[USER_QUOTES_KEY] = gson.toJson(quotes)
+        }
+    }
+
+    suspend fun saveGenerateQuoteCount(count: Int) {
+        context.dataStore.edit { preferences ->
+            preferences[GENERATE_QUOTE_COUNT_KEY] = count
+        }
+    }
+
+    suspend fun saveGenerateImageCount(count: Int) {
+        context.dataStore.edit { preferences ->
+            preferences[GENERATE_IMAGE_COUNT_KEY] = count
         }
     }
 
     suspend fun clearQuotes() {
+        context.dataStore.edit { preferences ->
+            preferences.remove(USER_QUOTES_KEY)
+        }
+    }
+
+    suspend fun clearAll() {
         context.dataStore.edit { preferences ->
             preferences.clear()
         }

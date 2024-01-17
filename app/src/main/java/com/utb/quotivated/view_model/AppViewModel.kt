@@ -13,7 +13,9 @@ import com.utb.quotivated.data_store.StoreFavorite
 import com.utb.quotivated.repositories.LoremPicsumRepository
 import com.utb.quotivated.repositories.QuotableRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.toList
 
+// AppViewModel.kt
 class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     private val quoteRepository = QuotableRepository()
@@ -32,6 +34,13 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     val savedQuotes: Flow<List<QuoteData>> = dataStore.getQuotes
 
+    // LiveData properties for generate quote and generate image counts
+    private val _generateQuoteCount = dataStore.getGenerateQuoteCount
+    val getQuoteCount: Flow<Int> get() = _generateQuoteCount
+
+    private val _generateImageCount = dataStore.getGenerateImageCount
+    val getImageCount: Flow<Int> get() = _generateImageCount
+
     var isFavorite by mutableStateOf(false)
 
     fun setLoadedData(quote: Quote?, photo: ByteArray?) {
@@ -39,7 +48,6 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         _photo.value = photo
     }
 
-    // New setters and getters for QuoteData
     fun setLoadedData(quoteData: QuoteData?) {
         _quoteData.value = quoteData
     }
@@ -67,4 +75,17 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     suspend fun clearQuotes() {
         dataStore.clearQuotes()
     }
+
+    suspend fun clearAll() {
+        dataStore.clearAll()
+    }
+
+    suspend fun saveGenerateQuoteCount(count: Int) {
+        dataStore.saveGenerateQuoteCount(count)
+    }
+
+    suspend fun saveGenerateImageCount(count: Int) {
+        dataStore.saveGenerateImageCount(count)
+    }
 }
+

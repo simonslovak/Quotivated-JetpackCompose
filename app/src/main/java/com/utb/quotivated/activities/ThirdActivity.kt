@@ -23,9 +23,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import coil.compose.rememberAsyncImagePainter
 import com.utb.quotivated.R
 import com.utb.quotivated.custom.CustomBaseButton
 import com.utb.quotivated.custom.CustomNavButton
@@ -33,8 +33,7 @@ import com.utb.quotivated.custom.RoundedBox
 import com.utb.quotivated.custom.TextWithShadow
 import com.utb.quotivated.ui.theme.QuotivatedTheme
 import com.utb.quotivated.view_model.AppViewModel
-import kotlinx.coroutines.flow.count
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
 
 class ThirdActivity : ComponentActivity() {
     private val AppViewModel by viewModels<AppViewModel>()
@@ -42,7 +41,6 @@ class ThirdActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             QuotivatedTheme {
-                // You can customize the color and appearance of the Surface as needed
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -57,8 +55,9 @@ class ThirdActivity : ComponentActivity() {
 @Composable
 fun ThirdScreen(navController: NavHostController, viewModel: AppViewModel) {
 
-    val scope = rememberCoroutineScope()
     val savedQuotesSize by viewModel.savedQuotes.collectAsState(initial = emptyList())
+    val savedQuoteCount by viewModel.getQuoteCount.collectAsState(initial = 0)
+    val savedImageCount by viewModel.getImageCount.collectAsState(initial = 0)
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -129,11 +128,10 @@ fun ThirdScreen(navController: NavHostController, viewModel: AppViewModel) {
                                             contentAlignment = Alignment.TopStart
                                         ) {
                                             TextWithShadow(
-                                                text = "" +
-                                                        "Favorites stored: ${savedQuotesSize.size}\n\n\n" +
-                                                        "Quotes generated: \n\n\n" +
-                                                        "Images generated: ",
-                                                fontSize = 30
+                                                text = "Favorites stored: ${savedQuotesSize.size}\n\n" +
+                                                       "Images generated: ${savedImageCount}\n\n" +
+                                                       "Quotes generated: ${savedQuoteCount}",
+                                                fontSize = 32
                                             )
                                         }
                                     }
@@ -153,7 +151,9 @@ fun ThirdScreen(navController: NavHostController, viewModel: AppViewModel) {
                         "Reset statistics",
                         1f,
                         onClick = {
-
+                            viewModel.viewModelScope.launch {
+                                viewModel.clearAll()
+                            }
                         }
                     )
                 }
@@ -168,7 +168,9 @@ fun ThirdScreen(navController: NavHostController, viewModel: AppViewModel) {
                         "Reset favorites",
                         1f,
                         onClick = {
-
+                            viewModel.viewModelScope.launch {
+                                viewModel.clearQuotes()
+                            }
                         }
                     )
                 }
