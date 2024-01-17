@@ -131,7 +131,7 @@ fun ThirdScreen(navController: NavHostController, viewModel: AppViewModel) {
                                                 text = "Favorites stored: ${savedQuotesSize.size}\n\n" +
                                                        "Images generated: ${savedImageCount}\n\n" +
                                                        "Quotes generated: ${savedQuoteCount}",
-                                                fontSize = 32
+                                                fontSize = 28
                                             )
                                         }
                                     }
